@@ -1,8 +1,14 @@
 from dotenv import find_dotenv, load_dotenv
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 from transformers import pipeline
 from langchain import PromptTemplate, LLMChain, OpenAI
+import os
 
+app = Flask(__name__)
+CORS(app)
 load_dotenv(find_dotenv())
+
 
 # Image to text
 def image_to_text(url):
@@ -12,12 +18,10 @@ def image_to_text(url):
     print(text)
     return text
 
-text = image_to_text("stock-photo-142984111.jpeg")
-
 # GPT Prompt
 def generate_caption(scenario):
     template = """
-    generate a cool instagram caption with Drake lyrics with this description
+    generate a cool instagram caption with JAY Z lyrics with this description
     ```{scenario}```
     """
 
@@ -33,4 +37,24 @@ def generate_caption(scenario):
 
     return caption
 
-generate_caption(text)
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image part'})
+    
+    image = request.files['image']
+    if image.filename == '':
+        return jsonify({'error': 'No selected image'})
+    
+    image_path = 'temp_image.jpg'
+    image.save(image_path)
+
+    text = image_to_text('temp_image.jpg')
+    caption = generate_caption(text)
+
+    os.remove(image_path)
+
+    return jsonify({'caption': caption})
+
+if __name__ == '__main__':
+   app.run(debug=True)
