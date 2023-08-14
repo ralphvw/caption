@@ -6,7 +6,7 @@ from langchain import PromptTemplate, LLMChain, OpenAI
 import os
 
 app = Flask(__name__)
-CORS(app, origins=["https://caption-frontend-pied.vercel.app/", "https://caption-production.up.railway.app"])
+CORS(app, origins=["https://caption-frontend-pied.vercel.app", "https://caption-production.up.railway.app"], methods=["POST"])
 load_dotenv(find_dotenv())
 
 
